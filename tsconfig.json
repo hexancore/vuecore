@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noImplicitThis": false,
+    "noImplicitAny": false,
+    "importHelpers": true,
+    "declaration": true,
+    "declarationMap": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "node"],
+    "incremental": false,
+    "lib": ["ES2022", "DOM"],
+    "outDir": "./lib",
+    "baseUrl": "./",
+    "paths": {
+      "@": ["src"],
+      "@/*": ["src/*"],
+    },
+  },
+
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "lib"],
+  "files": ["node_modules/jest-expect-message/types/index.d.ts"],
+
+  "typedocOptions": {
+    "mode": "file",
+    "out": "./docs",
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "hideGenerator": true
+  }
+}
