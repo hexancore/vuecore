@@ -28,6 +28,7 @@ import {
   toRefs,
 } from 'vue';
 import { ApiHttpClient, ApiHttpRequestConfig } from './ApiHttpClient';
+import { ApiHttpClientErrors } from './ApiHttpClientErrors';
 
 export interface HttpEndpointConfig {
   method: HttpMethod;
@@ -44,12 +45,13 @@ export interface HttpEndpointState<D = any> {
   error: AppError | null;
 }
 
+
 export type VueHttpEndpointRequestConfig<P = any, RD = null, D = any> = Pick<
   HttpRequestConfig<D>,
   RD extends null ? 'headers' | 'responseType' : 'data' | 'headers' | 'responseType'
 > &
   P extends null
-  ? {}
+  ? Record<string, never>
   : { params?: P };
 
 type UrlFnType = (params: Record<string, any>) => R<{ url: string; query: Record<string, any> }>;
@@ -66,18 +68,18 @@ export type VueHttpEndpointStateRefs<D> = ToRefs<HttpEndpointState<D>>;
  * @template D Response data type
  * @template RD RequestData type
  */
-export class VueHttpEndpoint<P = {}, RD = null, D = any> {
+export class VueHttpEndpoint<P = Record<string, never>, RD = null, D = any> {
   protected urlFn: UrlFnType;
   protected state: ShallowReactive<HttpEndpointState<D>>;
 
-  protected currentRequest: ApiHttpRequestConfig | null;
+  protected req: ApiHttpRequestConfig | null;
 
   public constructor(protected config: HttpEndpointConfig) {
     this.config.responseParser = config.responseParser ?? DefaultHttpResponseParser;
     this.config.responseType = config.responseType ?? 'json';
     this.urlFn = VueHttpEndpoint.createUrlFn(this.config.url);
     this.state = shallowReactive({ isLoading: false, data: null, error: null });
-    this.currentRequest = null;
+    this.req = null;
   }
 
   protected static createUrlFn(url: string): UrlFnType {
@@ -85,7 +87,7 @@ export class VueHttpEndpoint<P = {}, RD = null, D = any> {
       const t = new StringTemplate(url);
       const paramNames = StringTemplate.extractParams(url);
       return (params: Record<string, any>) =>
-        t.render(params).map((url: string) => ({
+        t.render(params).onOk((url: string) => ({
           url,
           query: VueHttpEndpoint.extractQueryFromParams(params, paramNames),
         }));
@@ -112,11 +114,11 @@ export class VueHttpEndpoint<P = {}, RD = null, D = any> {
     return toRefs(this.state);
   }
 
-  public send(req: VueHttpEndpointRequestConfig<P, RD>): AR<D> {
+  public send(req: VueHttpEndpointRequestConfig<P, RD>): AR<D, string> {
     if (this.state.isLoading) {
-      return ERRA('core.http_endpoint.request_in_progress', AppErrorCode.CONFLICT, {
+      return ERRA(ApiHttpClientErrors.endpointRequestInProgress, AppErrorCode.CONFLICT, {
         url: this.config.url,
-        currentRequest: this.currentRequest,
+        currentRequest: this.req,
       });
     }
 
@@ -124,23 +126,23 @@ export class VueHttpEndpoint<P = {}, RD = null, D = any> {
     this.state.error = null;
     this.state.data = null;
 
-    this.currentRequest = req as unknown as ApiHttpRequestConfig;
+    this.req = req as unknown as ApiHttpRequestConfig;
     const urlData = this.urlFn(req['params'] ?? {}).v;
     delete req['params'];
 
-    this.currentRequest.url = urlData.url;
-    this.currentRequest.query = urlData.query;
-    this.currentRequest.method = this.config.method;
-    this.currentRequest.responseType = this.currentRequest.responseType ?? this.config.responseType;
-    this.currentRequest.isProtected = this.config.isProtected;
+    this.req.url = urlData.url;
+    this.req.query = urlData.query;
+    this.req.method = this.config.method;
+    this.req.responseType = this.req.responseType ?? this.config.responseType;
+    this.req.isProtected = this.config.isProtected;
 
-    return this.config.client.send(this.currentRequest).onOkBind(this.onOk, this).onErrBind(this.onErr, this);
+    return this.config.client.send(this.req).onOkBind(this.onOk, this).onErrBind(this.onErr, this);
   }
 
   protected onErr(e: AppError): AR<D> {
     this.state.error = e;
     this.state.isLoading = false;
-    this.currentRequest = null;
+    this.req = null;
     return ERRA(e);
   }
 
@@ -148,7 +150,7 @@ export class VueHttpEndpoint<P = {}, RD = null, D = any> {
     return this.config.responseParser(response).onOk((parsedData) => {
       this.state.data = parsedData;
       this.state.isLoading = false;
-      this.currentRequest = null;
+      this.req = null;
       return OKA(this.state.data);
     });
   }

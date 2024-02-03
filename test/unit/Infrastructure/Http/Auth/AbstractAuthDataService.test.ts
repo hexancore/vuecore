@@ -2,6 +2,7 @@ import { ImmutableDate, OK, OKA, P } from '@hexancore/common';
 import { TEST_SUIT_NAME } from '@hexancore/common/testutil';
 import { AbstractAuthDataService } from '@/Infrastructure/Http/Auth/AbstractAuthDataService';
 import { ApiHttpRequestConfig } from '@/Infrastructure/Http';
+import { test, describe, expect, vi } from 'vitest';
 
 class TestAuthDataService extends AbstractAuthDataService<{ value: string }> {
   public injectToRequest(req: ApiHttpRequestConfig): void {
@@ -14,34 +15,34 @@ class TestAuthDataService extends AbstractAuthDataService<{ value: string }> {
 }
 
 describe(TEST_SUIT_NAME(__filename), () => {
-  let refreshAuthDataFn: jest.Mock;
-  let newAuthDataCallback: jest.Mock;
+  let refreshAuthDataFn;
+  let newAuthDataCallback;
   let service: TestAuthDataService;
 
   beforeEach(() => {
-    refreshAuthDataFn = jest.fn();
-    newAuthDataCallback = jest.fn();
+    refreshAuthDataFn = vi.fn();
+    newAuthDataCallback = vi.fn();
 
     service = new TestAuthDataService({ refreshAuthDataFn, newAuthDataCallback });
   });
 
   test('refresh()', async () => {
-    let calls = [];
+    const calls = [];
     const expectedData = { value: 'test' };
     refreshAuthDataFn.mockReturnValueOnce(OKA(expectedData));
     newAuthDataCallback.mockReturnValueOnce(OKA(true));
 
     const p1 = service.refresh().onOk(() => {
       calls.push(1);
-      return OK(1);
+      return OKA(1);
     });
     const p2 = service.refresh().onOk(() => {
       calls.push(2);
-      return OK(2);
+      return OKA(2);
     });
     const p3 = service.refresh().onOk(() => {
       calls.push(3);
-      return OK(3);
+      return OKA(3);
     });
 
     const current1 = await p1;

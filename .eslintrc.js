@@ -33,10 +33,4 @@ module.exports = {
     'function-call-argument-newline': 'off',
     'no-console': 'off',
   },
-  'jest/valid-expect': [
-    'error',
-    {
-      maxArgs: 2,
-    },
-  ],
 };

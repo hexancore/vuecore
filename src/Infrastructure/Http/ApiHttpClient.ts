@@ -1,5 +1,4 @@
 import { AR, AppError, AppErrorCode, ERRA, HttpClient, HttpRequestConfig, HttpResponse } from '@hexancore/common';
-import { AccessTokenData, BearerAuthDataService } from './Auth/BearerAuthDataService';
 import { AbstractAuthDataService } from './Auth/AbstractAuthDataService';
 
 export interface ApiHttpRequestConfig extends HttpRequestConfig {
