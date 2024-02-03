@@ -1,6 +1,7 @@
-import { AR, AppError, ERR, ERRA, OK, OKA, P, PB } from '@hexancore/common';
+import { AR, AppError, ERR, ERRA, OKA } from '@hexancore/common';
 import { ApiHttpRequestConfig } from '../ApiHttpClient';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AuthData {}
 
 export interface AuthDataServiceConfig<ADT> {
@@ -36,11 +37,8 @@ export abstract class AbstractAuthDataService<
       return this.currentRefreshCall;
     }
 
-    const that = this;
-    const onRefreshed = new Promise((resolve, reject) => {
-      that.waitingRequests.push({ resolve, reject });
-    });
-    return PB(onRefreshed);
+    return this.currentRefreshCall;
+
   }
 
   protected onRefreshError(e: AppError): AR<boolean> {
@@ -53,12 +51,7 @@ export abstract class AbstractAuthDataService<
   protected onRefreshed(data: ADT): AR<boolean> {
     this.currentData = data;
     this.currentRefreshCall = null;
-    return this.config.newAuthDataCallback(this.currentData).onOk(() => {
-      for (const r of this.waitingRequests) {
-        r.resolve();
-      }
-      return OK(true);
-    });
+    return this.config.newAuthDataCallback(this.currentData);
   }
 
   public getAuthData(): AR<ADT | null> {

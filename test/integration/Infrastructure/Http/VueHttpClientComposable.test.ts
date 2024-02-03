@@ -22,7 +22,7 @@ describe(TEST_SUIT_NAME(__filename), () => {
   let useModuleApi: () => ComposableDefineModuleApi;
 
   const { GET, POST, DELETE, PUT, PATCH } = VueDefineModuleApiMethods;
-  let TodoApiDef = {
+  const TodoApiDef = {
     public: {
       constants: {
         getList: GET<NO_PARAMS, Array<string>>(''),

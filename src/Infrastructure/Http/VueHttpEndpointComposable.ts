@@ -132,7 +132,6 @@ class ModuleApiDefinitionCompiler {
     if (def instanceof VueHttpEndpointDefObject) {
       let url = def.config.url;
       url = path + (url.length ? (url.startsWith('/') ? url : '/' + url) : '');
-      //console.log(def.config.method +" "+ url);
       return this.endpointFactory.create({config: {...def.config,  url}, isProtected});
     }
 

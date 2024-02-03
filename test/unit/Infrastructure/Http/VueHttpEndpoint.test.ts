@@ -2,6 +2,7 @@ import { VueHttpEndpoint } from '@/Infrastructure/Http/VueHttpEndpoint';
 import { HttpResponse, OK, OKA } from '@hexancore/common';
 import { TEST_SUIT_NAME } from '@hexancore/common/testutil';
 import { MockApiHttpClient } from '@/Test/Infrastructure/Http/MockApiHttpClient';
+import { ApiHttpClientErrors } from '../../../../src/Infrastructure/Http/ApiHttpClientErrors';
 
 describe(TEST_SUIT_NAME(__filename), () => {
   let clientMock: MockApiHttpClient;
@@ -61,7 +62,7 @@ describe(TEST_SUIT_NAME(__filename), () => {
 
     const current = await endpoint.send({});
 
-    expect(current).toMatchAppError({ type: 'core.http_endpoint.request_in_progress', code: 409 });
+    expect(current).toMatchAppError({ type: ApiHttpClientErrors.endpointRequestInProgress, code: 409 });
   });
 
   test('send() when url param and value given', async () => {

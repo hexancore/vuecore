@@ -1,9 +1,9 @@
 import { AppErrorProps, ERR, HttpMethod, HttpResponse, OKA, RawHttpResponseHeaders } from '@hexancore/common';
 import { ApiHttpClient, ApiHttpRequestConfig } from '@/Infrastructure/Http';
-import { M, MethodMock, Mocker } from '@hexancore/mocker';
+import { M, MethodMock, Mocker } from '@hexancore/mocker/vitest';
 
 export class MockRequestHandler {
-  public constructor(private m: MethodMock<any>) {}
+  public constructor(private m: MethodMock<any>) { }
   public replyOk(data: any, statusCode = 200, headers: RawHttpResponseHeaders = {}): void {
     this.m.andReturn(OKA({ data, statusCode, headers }));
   }
@@ -16,7 +16,7 @@ export class MockRequestHandler {
 type MockApiHttpRequestConfig = Partial<Omit<ApiHttpRequestConfig, 'method' | 'url' | 'data'>>;
 
 /**
- * Helper class for test api endpoints 
+ * Helper class for test api endpoints
  */
 export class MockApiHttpClient {
   private m: M<ApiHttpClient>;
@@ -78,11 +78,11 @@ export class MockApiHttpClient {
     return new MockRequestHandler(this.m.expects('send', expect.objectContaining(r)));
   }
 
-  public get i() {
+  public get i(): ApiHttpClient {
     return this.m.i;
   }
 
-  public checkExpections() {
+  public checkExpections(): void {
     this.m.checkExpections();
   }
 }
